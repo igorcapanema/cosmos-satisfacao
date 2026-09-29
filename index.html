@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pesquisa de Satisfação | Cosmos 3D</title>
+<style>
+:root{--blue:#4b83e8;--cyan:#32b8ed;--ink:#252a2e;--muted:#737b82;--line:#dce3e8;--bg:#f6f8fa;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.top{height:5px;background:linear-gradient(90deg,var(--blue),var(--cyan))}.shell{min-height:100vh;display:flex;flex-direction:column}.header{padding:28px 6vw 0;display:flex;justify-content:space-between;align-items:center}.brand{font-weight:800;letter-spacing:.12em}.brand span{color:var(--blue)}.progressText{font-size:13px;color:var(--muted)}.track{height:3px;background:#e6ebef;margin:18px 6vw 0}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:.35s}
+main{flex:1;display:grid;place-items:center;padding:36px 20px 70px}.card{width:min(850px,100%);background:white;border:1px solid var(--line);border-radius:24px;padding:clamp(28px,6vw,64px);box-shadow:0 18px 50px rgba(28,44,57,.06)}
+.kicker{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}h1{font-size:clamp(32px,5vw,58px);line-height:1.04;margin:0 0 18px;letter-spacing:-.04em}h2{font-size:clamp(25px,4vw,40px);line-height:1.12;margin:0 0 26px;letter-spacing:-.03em}p{color:var(--muted);font-size:17px;line-height:1.6}.btn{border:0;border-radius:12px;background:var(--ink);color:white;padding:15px 22px;font-weight:700;font-size:15px;cursor:pointer}.btn:hover{opacity:.9}.back{background:transparent;color:var(--muted);padding-left:0}.actions{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:14px}
+input[type=text],textarea{width:100%;font:inherit;font-size:18px;border:0;border-bottom:2px solid var(--line);padding:14px 2px;outline:0;background:transparent}input:focus,textarea:focus{border-color:var(--blue)}textarea{min-height:150px;resize:vertical}.scale{display:grid;grid-template-columns:repeat(10,1fr);gap:8px}.scale.nps{grid-template-columns:repeat(11,1fr)}.score{aspect-ratio:1;border:1px solid var(--line);background:white;border-radius:10px;font-weight:750;font-size:16px;cursor:pointer}.score:hover,.score.selected{border-color:var(--blue);background:var(--blue);color:white}.anchors{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:10px}.na{margin-top:18px}.na button{background:transparent;border:1px solid var(--line);border-radius:9px;padding:9px 12px;color:var(--muted);cursor:pointer}.na button.selected{border-color:var(--blue);color:var(--blue)}.optional{font-size:13px;color:var(--muted);font-weight:500}.success{text-align:center}.success .mark{font-size:48px;color:var(--blue)}
+@media(max-width:650px){.header{padding-top:20px}.card{border-radius:18px;padding:30px 22px}.scale,.scale.nps{grid-template-columns:repeat(5,1fr)}.score{aspect-ratio:auto;height:48px}.anchors{font-size:11px}.brand{font-size:14px}}
+</style>
+</head><body><div class="top"></div><div class="shell"><header class="header"><div class="brand">COSMOS <span>3D</span></div><div class="progressText" id="progressText"></div></header><div class="track"><div class="bar" id="bar"></div></div><main><section class="card" id="app"></section></main></div>
+<script>
+const questions=[
+{key:'projeto',type:'text',title:'Qual projeto ou obra você realizou com a Cosmos 3D?'},
+{key:'atendimento',type:'scale',title:'Como você avalia o atendimento e a disponibilidade da nossa equipe?'},
+{key:'comunicacao',type:'scale',title:'Como você avalia a clareza e a agilidade da nossa comunicação?'},
+{key:'prazos',type:'scale',title:'Como você avalia o cumprimento dos prazos e compromissos acordados?',na:true},
+{key:'qualidade',type:'scale',title:'Como você avalia a qualidade dos serviços executados pela Cosmos 3D?',na:true},
+{key:'resultado',type:'scale',title:'O resultado entregue pela Cosmos 3D atendeu ao que foi contratado e às suas expectativas?',na:true,anchors:['Não atendeu','Superou as expectativas']},
+{key:'satisfacao',type:'scale',title:'De modo geral, qual é o seu nível de satisfação com a Cosmos 3D?',anchors:['Muito insatisfeito','Muito satisfeito']},
+{key:'nps',type:'nps',title:'De 0 a 10, qual a probabilidade de você recomendar a Cosmos 3D para outra pessoa ou empresa?',anchors:['Nada provável','Extremamente provável']},
+{key:'comentario',type:'comment',title:'Há algo que poderíamos fazer para melhorar sua experiência com a Cosmos 3D? Se quiser, deixe também sugestões ou comentários.',optional:true}
+];
+let step=-1;const data={};const app=document.getElementById('app'),bar=document.getElementById('bar'),pt=document.getElementById('progressText');
+function render(){if(step<0){pt.textContent='';bar.style.width='0';app.innerHTML=`<div class="kicker">Pesquisa de satisfação</div><h1>Queremos ouvir você.</h1><p>Sua opinião é muito importante para nós. Esta pesquisa leva cerca de 1 minuto e nos ajuda a aprimorar continuamente nossos serviços e sua experiência com a Cosmos 3D.</p><div class="actions"><span></span><button class="btn" onclick="next()">Começar →</button></div>`;return}
+if(step>=questions.length){pt.textContent='Concluído';bar.style.width='100%';app.innerHTML=`<div class="success"><div class="mark">✓</div><div class="kicker">Obrigado</div><h2>Sua avaliação foi registrada.</h2><p>Sua opinião nos ajuda a construir uma Cosmos 3D cada vez melhor.</p></div>`;return}
+const q=questions[step];pt.textContent=`${step+1} de ${questions.length}`;bar.style.width=`${((step+1)/questions.length)*100}%`;let body='';
+if(q.type==='text') body=`<input id="field" type="text" placeholder="Nome do projeto ou obra" value="${data[q.key]||''}" autofocus>`;
+if(q.type==='comment') body=`<textarea id="field" placeholder="Escreva aqui...">${data[q.key]||''}</textarea>`;
+if(q.type==='scale'||q.type==='nps'){let start=q.type==='nps'?0:1,end=10;body=`<div class="scale ${q.type==='nps'?'nps':''}">${Array.from({length:end-start+1},(_,i)=>i+start).map(n=>`<button class="score ${data[q.key]===n?'selected':''}" onclick="pick(${n})">${n}</button>`).join('')}</div><div class="anchors"><span>${q.anchors?q.anchors[0]:'Péssimo'}</span><span>${q.anchors?q.anchors[1]:'Excelente'}</span></div>${q.na?`<div class="na"><button class="${data[q.key]==='N/A'?'selected':''}" onclick="pickNA()">Não se aplica</button></div>`:''}`}
+app.innerHTML=`<div class="kicker">${q.optional?'Opcional':'Sua avaliação'}</div><h2>${q.title}</h2>${body}<div class="actions"><button class="btn back" onclick="back()">← Voltar</button><button class="btn" onclick="next()">${step===questions.length-1?'Enviar avaliação':'Continuar →'}</button></div>`}
+function pick(v){data[questions[step].key]=v;render();setTimeout(next,180)}function pickNA(){data[questions[step].key]='N/A';render();setTimeout(next,180)}
+function next(){if(step>=0&&step<questions.length){const q=questions[step],f=document.getElementById('field');if(f)data[q.key]=f.value.trim();if(!q.optional&&(data[q.key]===undefined||data[q.key]==='')){if(f){f.focus();f.placeholder='Preencha este campo para continuar';}return}}step++;render()}function back(){if(step>-1)step--;render()}render();
+</script></body></html>
